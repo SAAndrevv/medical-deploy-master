@@ -1,0 +1,78 @@
+version: '2.4'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.10-management
+    healthcheck:
+      test: "rabbitmq-diagnostics is_running"
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    hostname: rabbit
+    ports:
+      - 5672:5672
+      - 15673:15672
+
+  message-analyzer:
+    image: application/message-analyzer:simple
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    environment:
+      SERVER_PORT: 8081
+    ports:
+      - 8092:8081
+
+  medical-monitoring:
+    image: application/medical-monitoring:simple
+    depends_on:
+      message-analyzer:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    environment:
+      SERVER_PORT: 8082
+    ports:
+      - 8093:8082
+
+  person-service:
+    image: application/person-service:simple
+    depends_on:
+      message-analyzer:
+        condition: service_healthy
+      medical-monitoring:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    environment:
+      SERVER_PORT: 8080
+    ports:
+      - 8091:8080
+
+  queue-reader:
+    image: application/queue-reader:simple
+    depends_on:
+      message-analyzer:
+        condition: service_healthy
+      medical-monitoring:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    environment:
+      SERVER_PORT: 8083
+    ports:
+      - 8094:8083
