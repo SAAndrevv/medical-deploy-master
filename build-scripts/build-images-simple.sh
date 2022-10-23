@@ -46,11 +46,19 @@ function pull_or_clone_proj() {
  if cd ${SERVICE_NAME}
   then
  #  git branch -f master origin/master
+<<<<<<< HEAD
    git checkout dev
    git pull
    cd ..
   else
     git clone --branch dev ${SERVICE_URL} ${SERVICE_NAME}
+=======
+   git checkout develop
+   git pull
+   cd ..
+  else
+    git clone --branch develop ${SERVICE_URL} ${SERVICE_NAME}
+>>>>>>> hometask-5
  fi
 }
 
@@ -70,10 +78,10 @@ build_jar medical-monitoring message-analyzer person-service queue-reader
 APP_VERSION=0.0.1-SNAPSHOT
 
 echo "Building Docker images"
-build_basic_images ./medical-monitoring/core/target/monitoring-core-${APP_VERSION}.jar application/medical-monitoring
-build_basic_images ./message-analyzer/core/target/message-core-${APP_VERSION}.jar application/message-analyzer
-build_basic_images ./person-service/core/target/person-core-${APP_VERSION}.jar application/person-service
-build_basic_images ./queue-reader/core/target/reader-core-${APP_VERSION}.jar application/queue-reader
+build_basic_images ./medical-monitoring/core/target/medical-monitoring-${APP_VERSION}.jar application/medical-monitoring
+build_basic_images ./message-analyzer/core/target/message-analyzer-${APP_VERSION}.jar application/message-analyzer
+build_basic_images ./person-service/core/target/person-service-${APP_VERSION}.jar application/person-service
+build_basic_images ./queue-reader/core/target/queue-reader-${APP_VERSION}.jar application/queue-reader
 
 echo "Docker container up"
 up_docker_container
